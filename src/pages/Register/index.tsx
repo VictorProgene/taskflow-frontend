@@ -5,6 +5,7 @@ import api from '../../services/api';
 
 export default function Register() {
   const navigate = useNavigate();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,17 +18,15 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // Chamada POST para a rota de cadastro da sua API FastAPI
-      await api.post('/auth/register', { email, password });
+      await api.post('/auth/register', { name, email, password });
       
       setSuccess(true);
-      // Aguarda 2 segundos para o usuário ler o sucesso e manda pro login
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || 'Erro ao criar conta. Tente novamente.');
+      setError(err.response?.data?.detail || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -36,7 +35,7 @@ export default function Register() {
   return (
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-2 bg-slate-950 font-sans">
       
-      {/* LADO ESQUERDO: Formulário */}
+      {/* LEFT SIDE: Form */}
       <div className="flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-slate-900 text-slate-100">
         <div className="mx-auto w-full max-w-md space-y-8">
           
@@ -46,31 +45,47 @@ export default function Register() {
               <UserPlus className="w-6 h-6" />
               <span>TaskFlow</span>
             </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-white">Crie sua conta</h2>
-            <p className="mt-2 text-sm text-slate-400">Comece a organizar suas tarefas hoje mesmo.</p>
+            <h2 className="mt-6 text-3xl font-extrabold text-white">Create your account</h2>
+            <p className="mt-2 text-sm text-slate-400">Start organizing your tasks today.</p>
           </div>
 
-          {/* Feedback de Erro */}
+          {/* Error Feedback */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center">
               {error}
             </div>
           )}
 
-          {/* Feedback de Sucesso */}
+          {/* Success Feedback */}
           {success && (
             <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-lg text-sm text-center">
-              Conta criada com sucesso! Redirecionando...
+              Account created successfully! Redirecting...
             </div>
           )}
 
-          {/* Formulário */}
+          {/* Form */}
           <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-4">
 
-              {/* Campo de E-mail */}
+              {/* Full Name Input */}
               <div>
-                <label className="text-sm font-medium text-slate-300 block mb-2">E-mail</label>
+                <label className="text-sm font-medium text-slate-300 block mb-2">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
+                    placeholder="John Doe"
+                  />
+                </div>
+              </div>
+
+              {/* Email Input */}
+              <div>
+                <label className="text-sm font-medium text-slate-300 block mb-2">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <input
@@ -79,14 +94,14 @@ export default function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
-                    placeholder="seu@email.com"
+                    placeholder="you@example.com"
                   />
                 </div>
               </div>
 
-              {/* Campo de Senha */}
+              {/* Password Input */}
               <div>
-                <label className="text-sm font-medium text-slate-300 block mb-2">Senha</label>
+                <label className="text-sm font-medium text-slate-300 block mb-2">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <input
@@ -107,14 +122,14 @@ export default function Register() {
               disabled={loading || success}
               className="w-full py-3 px-4 bg-sky-500 hover:bg-sky-600 disabled:bg-sky-500/50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-sky-500/10 cursor-pointer disabled:cursor-not-allowed"
             >
-              <span>{loading ? 'Cadastrando...' : 'Criar minha conta'}</span>
+              <span>{loading ? 'Registering...' : 'Sign Up'}</span>
             </button>
 
             <div className="text-center mt-4">
               <p className="text-sm text-slate-400">
-                Já tem uma conta?{' '}
+                Already have an account?{' '}
                 <Link to="/login" className="text-sky-400 hover:underline font-medium">
-                  Faça login
+                  Sign In
                 </Link>
               </p>
             </div>
@@ -123,15 +138,15 @@ export default function Register() {
         </div>
       </div>
 
-      {/* LADO DIREITO: Banner */}
+      {/* RIGHT SIDE: Banner */}
       <div className="hidden md:flex flex-col justify-center items-center bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 p-12 border-l border-slate-800">
         <div className="max-w-md text-center space-y-4">
           <div className="inline-flex p-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-sky-400 mb-2">
             <UserPlus className="w-8 h-8" />
           </div>
-          <h3 className="text-2xl font-bold text-white">Tudo começa aqui</h3>
+          <h3 className="text-2xl font-bold text-white">Everything starts here</h3>
           <p className="text-slate-400 leading-relaxed">
-            Crie sua conta gratuitamente e experimente um fluxo de trabalho sem interrupções e totalmente focado em resultados.
+            Create your account for free and experience a seamless, results-driven workflow tailored for your projects.
           </p>
         </div>
       </div>

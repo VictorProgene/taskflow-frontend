@@ -17,10 +17,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 1. FastAPI padrão (OAuth2) exige formato Form Data em vez de JSON para o login.
-      // Se a sua rota receber JSON puro, basta reverter para: await api.post('/auth/login', { email, password });
       const formData = new URLSearchParams();
-      formData.append('username', email); // O OAuth2 do FastAPI usa 'username' como chave para o e-mail
+      formData.append('username', email);
       formData.append('password', password);
 
       const response = await api.post('/auth/login', formData, {
@@ -29,26 +27,25 @@ export default function Login() {
         },
       });
       
-      // 2. O FastAPI retorna o token como 'access_token'
-      const token = response.data.access_token || response.data.token;
+      const token = response.data.access_token;
 
       if (token) {
-        // Salva o token no navegador
         localStorage.setItem('@TaskFlow:token', token);
 
-        // Navega automaticamente para o Dashboard após o login com sucesso
+        if (response.data.user && response.data.user.name) {
+          localStorage.setItem('@TaskFlow:user_name', response.data.user.name);
+        }
+
         navigate('/dashboard');
       } else {
-        setError('Erro ao ler a chave de acesso enviada pelo servidor.');
+        setError('Failed to process authentication keys from the server.');
       }
     } catch (err: any) {
       console.error(err);
-      
-      // Captura mensagens amigáveis retornadas pelo seu backend
       if (err.response && err.response.data && err.response.data.detail) {
         setError(err.response.data.detail);
       } else {
-        setError('E-mail ou senha incorretos.');
+        setError('Invalid email or password.');
       }
     } finally {
       setLoading(false);
@@ -58,21 +55,21 @@ export default function Login() {
   return (
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-2 bg-slate-950 font-sans">
       
-      {/* LADO ESQUERDO: Formulário */}
+      {/* LEFT SIDE: Form */}
       <div className="flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-slate-900 text-slate-100">
         <div className="mx-auto w-full max-w-md space-y-8">
           
-          {/* Header do Form */}
+          {/* Header */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2 text-sky-400 font-bold text-2xl tracking-wide">
               <LogIn className="w-6 h-6" />
               <span>TaskFlow</span>
             </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-white">Gerencie seus projetos</h2>
-            <p className="mt-2 text-sm text-slate-400">Entre com as suas credenciais para acessar o painel.</p>
+            <h2 className="mt-6 text-3xl font-extrabold text-white">Manage your workspace</h2>
+            <p className="mt-2 text-sm text-slate-400">Enter your credentials to access the control panel.</p>
           </div>
 
-          {/* Mensagem de Erro */}
+          {/* Error Message */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center font-medium">
               {error}
@@ -82,9 +79,9 @@ export default function Login() {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               
-              {/* Campo de E-mail */}
+              {/* Email Input */}
               <div>
-                <label className="text-sm font-medium text-slate-300 block mb-2">E-mail</label>
+                <label className="text-sm font-medium text-slate-300 block mb-2">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <input
@@ -94,14 +91,14 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all disabled:opacity-50"
-                    placeholder="seu@email.com"
+                    placeholder="you@example.com"
                   />
                 </div>
               </div>
 
-              {/* Campo de Senha */}
+              {/* Password Input */}
               <div>
-                <label className="text-sm font-medium text-slate-300 block mb-2">Senha</label>
+                <label className="text-sm font-medium text-slate-300 block mb-2">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                   <input
@@ -118,20 +115,20 @@ export default function Login() {
 
             </div>
 
-            {/* Botão de Submissão */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
               className="w-full py-3 px-4 bg-sky-500 hover:bg-sky-600 disabled:bg-sky-500/40 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-sky-500/10 cursor-pointer disabled:cursor-not-allowed"
             >
-              <span>{loading ? 'Carregando...' : 'Acessar o Painel'}</span>
+              <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
             </button>
             
             <div className="text-center mt-4">
               <p className="text-sm text-slate-400">
-                Não tem uma conta?{' '}
+                Don't have an account?{' '}
                 <Link to="/register" className="text-sky-400 hover:underline font-medium">
-                  Cadastre-se
+                  Sign Up
                 </Link>
               </p>
             </div>
@@ -140,15 +137,15 @@ export default function Login() {
         </div>
       </div>
 
-      {/* LADO DIREITO: Banner Visual */}
+      {/* RIGHT SIDE: Banner */}
       <div className="hidden md:flex flex-col justify-center items-center bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 p-12 border-l border-slate-800">
         <div className="max-w-md text-center space-y-4">
           <div className="inline-flex p-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-sky-400 mb-2">
             <LogIn className="w-8 h-8" />
           </div>
-          <h3 className="text-2xl font-bold text-white">Produtividade sem fricção</h3>
+          <h3 className="text-2xl font-bold text-white">Frictionless productivity</h3>
           <p className="text-slate-400 leading-relaxed">
-            Centralize suas sprints, distribua tarefas e acompanhe o progresso da sua equipe em tempo real.
+            Centralize your sprints, distribute tasks, and track your team's core progress completely in real time.
           </p>
         </div>
       </div>

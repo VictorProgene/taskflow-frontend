@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userName, setUserName] = useState('User');
 
   // States for the Create Task Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,6 +31,15 @@ export default function Dashboard() {
   const [newPriority, setNewPriority] = useState('medium');
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
+
+  // Helper function to extract initials dynamically
+  const getInitials = (name: string) => {
+    const names = name.trim().split(' ');
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
 
   // We isolated the fetch logic so we can call it initially and refresh after adding a task
   async function loadDashboardData() {
@@ -72,6 +82,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData();
+
+    // Fetch the user name stored on successful authentication
+    const savedName = localStorage.getItem('@TaskFlow:user_name');
+    if (savedName) {
+      setUserName(savedName);
+    }
   }, []);
 
   // Submits the new task payload to FastAPI POST /tasks/
@@ -114,44 +130,44 @@ export default function Dashboard() {
       <main className="flex-1 p-8">
         <header className="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-white">Painel Principal</h1>
-            <p className="text-sm text-slate-400 mt-1">Bem-vindo de volta ao TaskFlow.</p>
+            <h1 className="text-3xl font-bold text-white">Main Dashboard</h1>
+            <p className="text-sm text-slate-400 mt-1">Welcome back, {userName}.</p>
           </div>
           
           <div className="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
-            <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold text-sm">
-              JV
+            <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold text-sm tracking-wider">
+              {getInitials(userName)}
             </div>
-            <span className="text-sm font-medium">João Victor</span>
+            <span className="text-sm font-medium">{userName}</span>
           </div>
         </header>
 
-        {/* Grid de Estatísticas */}
+        {/* Statistics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-            <h3 className="text-slate-400 text-sm font-medium">Total de Tarefas</h3>
+            <h3 className="text-slate-400 text-sm font-medium">Total Tasks</h3>
             <p className="text-3xl font-bold mt-2 text-white">
               {loading ? '...' : tasks.length}
             </p>
           </div>
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-            <h3 className="text-slate-400 text-sm font-medium">Tarefas Pendentes</h3>
+            <h3 className="text-slate-400 text-sm font-medium">Pending Tasks</h3>
             <p className="text-3xl font-bold mt-2 text-amber-400">
               {loading ? '...' : tasks.filter(t => t.status !== 'done').length}
             </p>
           </div>
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-            <h3 className="text-slate-400 text-sm font-medium">Concluídas</h3>
+            <h3 className="text-slate-400 text-sm font-medium">Completed</h3>
             <p className="text-3xl font-bold mt-2 text-emerald-400">
               {loading ? '...' : tasks.filter(t => t.status === 'done').length}
             </p>
           </div>
         </div>
 
-        {/* 📋 SEÇÃO DE TAREFAS */}
+        {/* 📋 TASKS SECTION */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
           <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-            <h2 className="text-xl font-bold text-white">Suas Tarefas Recentes</h2>
+            <h2 className="text-xl font-bold text-white">Your Recent Tasks</h2>
             
             <button 
               onClick={() => {
@@ -162,13 +178,13 @@ export default function Dashboard() {
               }}
               className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
             >
-              + Nova Tarefa
+              + New Task
             </button>
           </div>
 
           {loading && (
             <div className="p-8 text-center text-slate-400 text-sm">
-              Carregando tarefas do servidor...
+              Loading tasks from server...
             </div>
           )}
 
@@ -180,7 +196,7 @@ export default function Dashboard() {
 
           {!loading && !error && tasks.length === 0 && (
             <div className="p-8 text-center text-slate-500 text-sm">
-              Nenhuma tarefa encontrada. Comece criando uma!
+              No tasks found. Get started by creating one!
             </div>
           )}
 
@@ -189,10 +205,10 @@ export default function Dashboard() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/40">
-                    <th className="py-4 px-6">Tarefa</th>
-                    <th className="py-4 px-6">Projeto</th>
+                    <th className="py-4 px-6">Task</th>
+                    <th className="py-4 px-6">Project</th>
                     <th className="py-4 px-6">Status</th>
-                    <th className="py-4 px-6">Prioridade</th>
+                    <th className="py-4 px-6">Priority</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 text-sm">
@@ -200,7 +216,7 @@ export default function Dashboard() {
                     <tr key={task.id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="py-4 px-6 font-medium text-white">{task.title}</td>
                       <td className="py-4 px-6 text-slate-400">
-                        {task.project?.name || 'Sem projeto'}
+                        {task.project?.name || 'No project'}
                       </td>
                       <td className="py-4 px-6">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
@@ -208,9 +224,9 @@ export default function Dashboard() {
                           ${task.status === 'in_progress' ? 'bg-sky-500/10 border-sky-500/20 text-sky-400' : ''}
                           ${task.status === 'pending' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : ''}
                         `}>
-                          {task.status === 'done' && 'Concluído'}
-                          {task.status === 'in_progress' && 'Em Progresso'}
-                          {task.status === 'pending' && 'Pendente'}
+                          {task.status === 'done' && 'Completed'}
+                          {task.status === 'in_progress' && 'In Progress'}
+                          {task.status === 'pending' && 'Pending'}
                         </span>
                       </td>
                       <td className="py-4 px-6">
@@ -219,9 +235,9 @@ export default function Dashboard() {
                           ${task.priority === 'medium' ? 'text-yellow-400' : ''}
                           ${task.priority === 'low' ? 'text-sky-400' : ''}
                         `}>
-                          {task.priority === 'high' && 'Alta'}
-                          {task.priority === 'medium' && 'Média'}
-                          {task.priority === 'low' && 'Baixa'}
+                          {task.priority === 'high' && 'High'}
+                          {task.priority === 'medium' && 'Medium'}
+                          {task.priority === 'low' && 'Low'}
                         </span>
                       </td>
                     </tr>

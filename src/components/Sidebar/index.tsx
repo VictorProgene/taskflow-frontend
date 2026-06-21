@@ -32,7 +32,7 @@ export default function Sidebar() {
             <LayoutDashboard className="w-5 h-5" />
             <span>Dashboard</span>
           </button>
-
+        {/*
           <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 hover:text-white rounded-lg transition-colors cursor-pointer text-left">
             <FolderKanban className="w-5 h-5" />
             <span>Projetos</span>
@@ -42,6 +42,7 @@ export default function Sidebar() {
             <Settings className="w-5 h-5" />
             <span>Configurações</span>
           </button>
+        */}
         </nav>
       </div>
 
