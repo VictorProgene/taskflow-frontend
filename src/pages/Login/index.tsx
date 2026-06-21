@@ -3,42 +3,57 @@ import { LogIn, Mail, Lock } from 'lucide-react';
 import api from '../../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 
-
 export default function Login() {
-  // O useState cria variáveis "vivas" no React (equivalente a propriedades de uma classe que atualizam a tela)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-const [error, setError] = useState('');
-const [loading, setLoading] = useState(false);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  try {
-    // Faz a chamada POST idêntica ao que você faria no Postman/Python
-    const response = await api.post('/auth/login', { email, password });
-    
-    // Supondo que sua API devolva { token: 'xyz', user: {...} }
-    const { token } = response.data;
+    try {
+      // 1. FastAPI padrão (OAuth2) exige formato Form Data em vez de JSON para o login.
+      // Se a sua rota receber JSON puro, basta reverter para: await api.post('/auth/login', { email, password });
+      const formData = new URLSearchParams();
+      formData.append('username', email); // O OAuth2 do FastAPI usa 'username' como chave para o e-mail
+      formData.append('password', password);
 
-    // Salva o token no navegador
-    localStorage.setItem('@TaskFlow:token', token);
+      const response = await api.post('/auth/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      
+      // 2. O FastAPI retorna o token como 'access_token'
+      const token = response.data.access_token || response.data.token;
 
-    // Navega automaticamente para o Dashboard após o login com sucesso
-    navigate('/dashboard');
-  } catch (err: any) {
-    console.error(err);
-    setError(err.response?.data?.message || 'E-mail ou senha incorretos.');
-  } finally {
-    setLoading(false);
-  }
-};
-    // Mais para frente, aqui faremos a chamada para o seu backend no Railway!
-  
+      if (token) {
+        // Salva o token no navegador
+        localStorage.setItem('@TaskFlow:token', token);
+
+        // Navega automaticamente para o Dashboard após o login com sucesso
+        navigate('/dashboard');
+      } else {
+        setError('Erro ao ler a chave de acesso enviada pelo servidor.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      
+      // Captura mensagens amigáveis retornadas pelo seu backend
+      if (err.response && err.response.data && err.response.data.detail) {
+        setError(err.response.data.detail);
+      } else {
+        setError('E-mail ou senha incorretos.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-2 bg-slate-950 font-sans">
@@ -57,12 +72,13 @@ const handleSubmit = async (e: React.FormEvent) => {
             <p className="mt-2 text-sm text-slate-400">Entre com as suas credenciais para acessar o painel.</p>
           </div>
 
-          {/* Formulário HTML/JSX */}
+          {/* Mensagem de Erro */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center">
-                {error}
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center font-medium">
+              {error}
             </div>
-            )}
+          )}
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               
@@ -74,9 +90,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <input
                     type="email"
                     required
+                    disabled={loading}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)} // Atualiza o estado ao digitar
-                    className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all disabled:opacity-50"
                     placeholder="seu@email.com"
                   />
                 </div>
@@ -90,9 +107,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <input
                     type="password"
                     required
+                    disabled={loading}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)} // Atualiza o estado ao digitar
-                    className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all disabled:opacity-50"
                     placeholder="••••••••"
                   />
                 </div>
@@ -103,24 +121,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Botão de Submissão */}
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-sky-500 hover:bg-sky-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-sky-500/10 cursor-pointer"
+              disabled={loading}
+              className="w-full py-3 px-4 bg-sky-500 hover:bg-sky-600 disabled:bg-sky-500/40 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-sky-500/10 cursor-pointer disabled:cursor-not-allowed"
             >
               <span>{loading ? 'Carregando...' : 'Acessar o Painel'}</span>
             </button>
+            
             <div className="text-center mt-4">
-                <p className="text-sm text-slate-400">
-                    Não tem uma conta?{' '}
-                    <Link to="/register" className="text-sky-400 hover:underline font-medium">
-                    Cadastre-se
-                    </Link>
-                </p>
+              <p className="text-sm text-slate-400">
+                Não tem uma conta?{' '}
+                <Link to="/register" className="text-sky-400 hover:underline font-medium">
+                  Cadastre-se
+                </Link>
+              </p>
             </div>
 
           </form>
         </div>
       </div>
 
-      {/* LADO DIREITO: Banner Visual (Escondido em telas pequenas/mobile) */}
+      {/* LADO DIREITO: Banner Visual */}
       <div className="hidden md:flex flex-col justify-center items-center bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 p-12 border-l border-slate-800">
         <div className="max-w-md text-center space-y-4">
           <div className="inline-flex p-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-sky-400 mb-2">
