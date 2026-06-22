@@ -15,7 +15,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4 text-slate-300">
-      {/* Topo da Sidebar: Logo e Links */}
+      {/* Sidebar Header: Logo and Links */}
       <div className="space-y-8">
         {/* Brand/Logo */}
         <div className="flex items-center gap-2 px-2 text-white font-bold text-xl tracking-wide">
@@ -23,7 +23,7 @@ export default function Sidebar() {
           <span>TaskFlow</span>
         </div>
 
-        {/* Links de Navegação */}
+        {/* Navigation Links */}
         <nav className="space-y-1">
           <button 
             onClick={() => navigate('/dashboard')}
@@ -35,24 +35,24 @@ export default function Sidebar() {
         {/*
           <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 hover:text-white rounded-lg transition-colors cursor-pointer text-left">
             <FolderKanban className="w-5 h-5" />
-            <span>Projetos</span>
+            <span>Projects</span>
           </button>
 
           <button className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-slate-800 hover:text-white rounded-lg transition-colors cursor-pointer text-left">
             <Settings className="w-5 h-5" />
-            <span>Configurações</span>
+            <span>Settings</span>
           </button>
         */}
         </nav>
       </div>
 
-      {/* Rodapé da Sidebar: Botão de Sair */}
+      {/* Sidebar Footer: Logout Button */}
       <button 
-        onClick={handleLogout} // 👈 Ativa o fluxo real de logout
+        onClick={handleLogout} // 👈 Activates the logout flow
         className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors cursor-pointer text-left font-medium"
       >
         <LogOut className="w-5 h-5" />
-        <span>Sair</span>
+        <span>Logout</span>
       </button>
     </aside>
   );
