@@ -1,4 +1,4 @@
-import { LayoutDashboard, FolderKanban, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Sidebar() {
