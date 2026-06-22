@@ -25,10 +25,8 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [userName, setUserName] = useState('User');
 
-  // Estado para controlar a visibilidade da coluna de prioridades
   const [showPriority, setShowPriority] = useState(false);
 
-  // Estados dos Modais
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState('medium');
@@ -39,7 +37,6 @@ export default function Dashboard() {
   const [newProjectName, setNewProjectName] = useState('');
   const [projectModalLoading, setProjectModalLoading] = useState(false);
 
-  // Estados de travamento para salvamento inline
   const [statusUpdatingId, setStatusUpdatingId] = useState<number | null>(null);
   const [priorityUpdatingId, setPriorityUpdatingId] = useState<number | null>(null);
 
@@ -78,7 +75,7 @@ export default function Dashboard() {
       
     } catch (err: any) {
       console.error('Error loading dashboard data:', err);
-      setError('Não foi possível carregar os dados do servidor.');
+      setError('Unable to load data from the server.');
     } finally {
       setLoading(false);
     }
@@ -104,7 +101,7 @@ export default function Dashboard() {
       );
     } catch (err) {
       console.error('Error changing task status:', err);
-      alert('Falha ao atualizar o status da tarefa.');
+      alert('Failed to update task status.');
     } finally {
       setStatusUpdatingId(null);
     }
@@ -132,7 +129,7 @@ export default function Dashboard() {
           prevTasks.map(t => t.id === taskId ? { ...t, priority: newPriorityValue } : t)
         );
       } catch (e) {
-        alert('Falha ao atualizar a prioridade da tarefa.');
+        alert('Failed to update task priority.');
       }
     } finally {
       setPriorityUpdatingId(null);
@@ -159,7 +156,7 @@ export default function Dashboard() {
       await loadDashboardData();
     } catch (err) {
       console.error('Error creating task:', err);
-      alert('Falha ao criar a tarefa.');
+      alert('Failed to create task.');
     } finally {
       setTaskModalLoading(false);
     }
@@ -178,7 +175,7 @@ export default function Dashboard() {
       await loadDashboardData();
     } catch (err) {
       console.error('Error creating project:', err);
-      alert('Falha ao criar o projeto.');
+      alert('Failed to create project.');
     } finally {
       setProjectModalLoading(false);
     }
@@ -191,8 +188,8 @@ export default function Dashboard() {
       <main className="flex-1 p-8">
         <header className="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-white">Painel Principal</h1>
-            <p className="text-sm text-slate-400 mt-1">Bem-vindo de volta, {userName}.</p>
+            <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+            <p className="text-sm text-slate-400 mt-1">Welcome back, {userName}.</p>
           </div>
           
           <div className="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
@@ -203,27 +200,27 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Estatísticas */}
+        {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-            <h3 className="text-slate-400 text-sm font-medium">Total de Tarefas</h3>
+            <h3 className="text-slate-400 text-sm font-medium">Total Tasks</h3>
             <p className="text-3xl font-bold mt-2 text-white">{loading ? '...' : tasks.length}</p>
           </div>
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-            <h3 className="text-slate-400 text-sm font-medium">Tarefas Pendentes</h3>
+            <h3 className="text-slate-400 text-sm font-medium">Pending Tasks</h3>
             <p className="text-3xl font-bold mt-2 text-amber-400">{loading ? '...' : tasks.filter(t => t.status !== 'done').length}</p>
           </div>
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-            <h3 className="text-slate-400 text-sm font-medium">Concluídas</h3>
+            <h3 className="text-slate-400 text-sm font-medium">Completed</h3>
             <p className="text-3xl font-bold mt-2 text-emerald-400">{loading ? '...' : tasks.filter(t => t.status === 'done').length}</p>
           </div>
         </div>
 
-        {/* 📋 SEÇÃO DE TAREFAS */}
+        {/* 📋 TASKS SECTION */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
           <div className="p-5 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/50">
             <div className="flex items-center gap-4">
-              <h2 className="text-xl font-bold text-white">Suas Tarefas Recentes</h2>
+              <h2 className="text-xl font-bold text-white">Your Recent Tasks</h2>
               
               <button
                 type="button"
@@ -234,7 +231,7 @@ export default function Dashboard() {
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700'
                 }`}
               >
-                {showPriority ? 'Ocultar Prioridade' : 'Exibir Prioridade'}
+                {showPriority ? 'Hide Priority' : 'Show Priority'}
               </button>
             </div>
             
@@ -244,38 +241,38 @@ export default function Dashboard() {
                 onClick={() => setIsProjectModalOpen(true)} 
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors cursor-pointer"
               >
-                + Novo Projeto
+                + New Project
               </button>
               <button 
                 type="button" 
                 onClick={() => { if (projects.length > 0) setSelectedProjectId(String(projects[0].id)); setIsTaskModalOpen(true); }} 
                 className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
               >
-                + Nova Tarefa
+                + New Task
               </button>
             </div>
           </div>
 
-          {loading && <div className="p-8 text-center text-slate-400 text-sm">Carregando tarefas...</div>}
+          {loading && <div className="p-8 text-center text-slate-400 text-sm">Loading tasks...</div>}
 
-          {!loading && !error && tasks.length === 0 && <div className="p-8 text-center text-slate-500 text-sm">Nenhuma tarefa encontrada.</div>}
+          {!loading && !error && tasks.length === 0 && <div className="p-8 text-center text-slate-500 text-sm">No tasks found.</div>}
 
           {!loading && !error && tasks.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/40">
-                    <th className="py-4 px-6">Tarefa</th>
-                    <th className="py-4 px-6">Projeto</th>
+                    <th className="py-4 px-6">Task</th>
+                    <th className="py-4 px-6">Project</th>
                     <th className="py-4 px-6">Status</th>
-                    {showPriority && <th className="py-4 px-6">Prioridade</th>}
+                    {showPriority && <th className="py-4 px-6">Priority</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 text-sm">
                   {tasks.map((task) => (
                     <tr key={task.id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="py-4 px-6 font-medium text-white">{task.title}</td>
-                      <td className="py-4 px-6 text-slate-400">{task.project?.name || 'Sem projeto'}</td>
+                      <td className="py-4 px-6 text-slate-400">{task.project?.name || 'No project'}</td>
                       <td className="py-4 px-6">
                         <select
                           value={task.status}
@@ -287,9 +284,9 @@ export default function Dashboard() {
                             ${task.status === 'pending' ? 'border-amber-500/30 text-amber-400' : ''}
                           `}
                         >
-                          <option value="pending" className="bg-slate-900 text-amber-400">Pendente</option>
-                          <option value="in_progress" className="bg-slate-900 text-sky-400">Em Progresso</option>
-                          <option value="done" className="bg-slate-900 text-emerald-400">Concluído</option>
+                          <option value="pending" className="bg-slate-900 text-amber-400">Pending</option>
+                          <option value="in_progress" className="bg-slate-900 text-sky-400">In Progress</option>
+                          <option value="done" className="bg-slate-900 text-emerald-400">Done</option>
                         </select>
                       </td>
 
@@ -305,9 +302,9 @@ export default function Dashboard() {
                               ${task.priority === 'low' ? 'border-sky-500/30 text-sky-400' : ''}
                             `}
                           >
-                            <option value="low" className="bg-slate-900 text-sky-400">Baixa</option>
-                            <option value="medium" className="bg-slate-900 text-yellow-400">Média</option>
-                            <option value="high" className="bg-slate-900 text-rose-400">Alta</option>
+                            <option value="low" className="bg-slate-900 text-sky-400">Low</option>
+                            <option value="medium" className="bg-slate-900 text-yellow-400">Medium</option>
+                            <option value="high" className="bg-slate-900 text-rose-400">High</option>
                           </select>
                         </td>
                       )}
@@ -320,14 +317,14 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* 🛠️ MODAIS COMPLETOS DE VOLTA */}
+      {/* 🛠️ MODALS */}
       {isProjectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-6 text-slate-100">
-            <h2 className="text-xl font-bold text-white mb-4">Criar Novo Projeto</h2>
+            <h2 className="text-xl font-bold text-white mb-4">Create New Project</h2>
             <form onSubmit={handleCreateProject} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Nome do Projeto</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Project Name</label>
                 <input
                   type="text"
                   required
@@ -338,8 +335,8 @@ export default function Dashboard() {
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800 mt-6">
-                <button type="button" onClick={() => setIsProjectModalOpen(false)} className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-lg">Cancelar</button>
-                <button type="submit" disabled={projectModalLoading} className="px-4 py-2 bg-sky-500 text-white text-sm font-medium rounded-lg">{projectModalLoading ? 'Criando...' : 'Criar Projeto'}</button>
+                <button type="button" onClick={() => setIsProjectModalOpen(false)} className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-lg">Cancel</button>
+                <button type="submit" disabled={projectModalLoading} className="px-4 py-2 bg-sky-500 text-white text-sm font-medium rounded-lg">{projectModalLoading ? 'Creating...' : 'Create Project'}</button>
               </div>
             </form>
           </div>
@@ -349,36 +346,36 @@ export default function Dashboard() {
       {isTaskModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-6 text-slate-100">
-            <h2 className="text-xl font-bold text-white mb-4">Criar Nova Tarefa</h2>
+            <h2 className="text-xl font-bold text-white mb-4">Create New Task</h2>
             <form onSubmit={handleCreateTask} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Título da Tarefa</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Task Title</label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Desenhar schemas do banco"
+                  placeholder="Ex: Design database schemas"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:outline-none focus:border-sky-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Projeto</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Project</label>
                 <select value={selectedProjectId} onChange={(e) => setSelectedProjectId(e.target.value)} className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm">
                   {projects.map((p) => <option key={p.id} value={String(p.id)}>{p.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Prioridade</label>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Priority</label>
                 <select value={newPriority} onChange={(e) => setNewPriority(e.target.value)} className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm">
-                  <option value="low">Baixa</option>
-                  <option value="medium">Média</option>
-                  <option value="high">Alta</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
                 </select>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800 mt-6">
-                <button type="button" onClick={() => setIsTaskModalOpen(false)} className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-lg">Cancelar</button>
-                <button type="submit" disabled={taskModalLoading} className="px-4 py-2 bg-sky-500 text-white text-sm font-medium rounded-lg">Criar Tarefa</button>
+                <button type="button" onClick={() => setIsTaskModalOpen(false)} className="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-lg">Cancel</button>
+                <button type="submit" disabled={taskModalLoading} className="px-4 py-2 bg-sky-500 text-white text-sm font-medium rounded-lg">{taskModalLoading ? 'Creating...' : 'Create Task'}</button>
               </div>
             </form>
           </div>
